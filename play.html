@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="author" content="Manmohan Singh">
+  <title>Tower Defense</title>
+  <link href="style.css" rel="stylesheet">
+  <script src="scripts/lib/lz-string.min.js" defer></script>
+  <script src="scripts/lib/p5.min.js" defer></script>
+  <script src="scripts/lib/p5.sound.min.js" defer></script>
+  <script src="scripts/assigns.js" defer></script>
+  <script src="scripts/maps.js" defer></script>
+  <script src="scripts/utils.js" defer></script>
+  <script src="scripts/scrap.js" defer></script>
+  <script src="scripts/enemy.js" defer></script>
+  <script src="scripts/enemies.js" defer></script>
+  <script src="scripts/particle.js" defer></script>
+  <script src="scripts/particle_system.js" defer></script>
+  <script src="scripts/effect.js" defer></script>
+  <script src="scripts/effects.js" defer></script>
+  <script src="scripts/tower.js" defer></script>
+  <script src="scripts/towers.js" defer></script>
+  <script src="scripts/missile.js" defer></script>
+  <script src="scripts/tiles.js" defer></script>
+  <script src="scripts/sketch.js" defer></script>
+</head>
+
+<body>
+  <div id="sketch-holder"></div>
+  <div id="status">
+    <p id="health"><span class="pic"></span><span class="txt" id="h">000</span></p>
+    <p id="cash"><span class="pic"></span><span class="txt" id="c">000</span></p>
+    <p id="wave"><span class="pic"></span><span class="txt" id="w">000</span></p>
+  </div>
+  <div id="menu">
+    <div id="pause" onmouseup="pause()"></div>
+    <div id="Skip" onclick="skipFast()">
+      <svg width="35px" height="35px" viewBox="0 -2 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:sketch="http://www.bohemiancoding.com/sketch/ns">
+        <g id="Icon-Set-Filled" sketch:type="MSLayerGroup" transform="translate(-570.000000, -571.000000)"
+          fill="#4f4426">
+          <path
+            d="M601.415,583.561 L584.429,571.372 C583.303,570.768 582.013,570.625 582.012,572.951 L582.012,578.256 L572.417,571.372 C571.291,570.768 569.969,570.75 570,573.014 L570,596.955 C570.032,599 571.385,599.296 572.417,598.628 L582.012,591.744 L582.012,596.986 C582.013,598.969 583.396,599.296 584.429,598.628 L601.415,586.44 C602.197,585.645 602.197,584.355 601.415,583.561"
+            id="forward" sketch:type="MSShapeGroup">
+          </path>
+        </g>
+      </svg>
+    </div>
+  </div>
+
+  <div class="group">
+    <div class="wpns gun" onmouseup="setPlace('gun')">
+      <p></p>
+    </div>
+    <div class="wpns laser" onmouseup="setPlace('laser')">
+      <p></p>
+    </div>
+    <div class="wpns slow" onmouseup="setPlace('slow')">
+      <p></p>
+    </div>
+    <div class="wpns sniper" onmouseup="setPlace('sniper')">
+      <p></p>
+    </div>
+    <div class="wpns rocket" onmouseup="setPlace('rocket')">
+      <p></p>
+    </div>
+    <div class="wpns bomb" onmouseup="setPlace('bomb')">
+      <p></p>
+    </div>
+    <div class="wpns tesla" onmouseup="setPlace('tesla')">
+      <p></p>
+    </div>
+  </div>
+
+  <div id="info-div">
+    <div id="closeInfo" onclick="clearInfo()"></div>
+    <div id="core">
+      <div id="name"></div>
+      <div id="cost"></div>
+      <div id="sellPrice"></div>
+      <div id="upPrice"></div>
+      <div id="damage"></div>
+      <div id="type"></div>
+      <div id="range"></div>
+      <div id="cooldown"></div>
+    </div>
+  </div>
+
+  <div id="info-buttons">
+    <span id="sell" onmousedown="if (selected) sell(selected)">
+      <svg width="35px" height="35px" viewBox="0 0 128 128" xmlns="http://www.w3.org/2000/svg"
+        xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--noto"
+        preserveAspectRatio="xMidYMid meet">
+        <g fill="none">
+          <path
+            d="M93.46 39.45c6.71-1.49 15.45-8.15 16.78-11.43c.78-1.92-3.11-4.92-4.15-6.13c-2.38-2.76-1.42-4.12-.5-7.41c1.05-3.74-1.44-7.87-4.97-9.49s-7.75-1.11-11.3.47c-3.55 1.58-6.58 4.12-9.55 6.62c-2.17-1.37-5.63-7.42-11.23-3.49c-3.87 2.71-4.22 8.61-3.72 13.32c1.17 10.87 3.85 16.51 8.9 18.03c6.38 1.92 13.44.91 19.74-.49z"
+            fill="#4f4426">
+          </path>
+          <path
+            d="M104.36 8.18c-.85 14.65-15.14 24.37-21.92 28.65l4.4 3.78s2.79.06 6.61-1.16c6.55-2.08 16.12-7.96 16.78-11.43c.97-5.05-4.21-3.95-5.38-7.94c-.61-2.11 2.97-6.1-.49-11.9zm-24.58 3.91s-2.55-2.61-4.44-3.8c-.94 1.77-1.61 3.69-1.94 5.67c-.59 3.48 0 8.42 1.39 12.1c.22.57 1.04.48 1.13-.12c1.2-7.91 3.86-13.85 3.86-13.85z"
+            fill="#00000050">
+          </path>
+          <path
+            d="M61.96 38.16S30.77 41.53 16.7 68.61c-14.07 27.08-2.11 43.5 10.55 49.48c12.66 5.98 44.56 8.09 65.31 3.17s25.94-15.12 24.97-24.97c-1.41-14.38-14.77-23.22-14.77-23.22s.53-17.76-13.25-29.29c-12.23-10.24-27.55-5.62-27.55-5.62z"
+            fill="#4f4426">
+          </path>
+          <path
+            d="M74.76 83.73c-6.69-8.44-14.59-9.57-17.12-12.6c-1.38-1.65-2.19-3.32-1.88-5.39c.33-2.2 2.88-3.72 4.86-4.09c2.31-.44 7.82-.21 12.45 4.2c1.1 1.04.7 2.66.67 4.11c-.08 3.11 4.37 6.13 7.97 3.53c3.61-2.61.84-8.42-1.49-11.24c-1.76-2.13-8.14-6.82-16.07-7.56c-2.23-.21-11.2-1.54-16.38 8.31c-1.49 2.83-2.04 9.67 5.76 15.45c1.63 1.21 10.09 5.51 12.44 8.3c4.07 4.83 1.28 9.08-1.9 9.64c-8.67 1.52-13.58-3.17-14.49-5.74c-.65-1.83.03-3.81-.81-5.53c-.86-1.77-2.62-2.47-4.48-1.88c-6.1 1.94-4.16 8.61-1.46 12.28c2.89 3.93 6.44 6.3 10.43 7.6c14.89 4.85 22.05-2.81 23.3-8.42c.92-4.11.82-7.67-1.8-10.97z"
+            fill="#FFCA28">
+          </path>
+          <path d="M71.16 48.99c-12.67 27.06-14.85 61.23-14.85 61.23" stroke="#FFCA28" stroke-width="5"
+            stroke-miterlimit="10">
+          </path>
+          <path
+            d="M81.67 31.96c8.44 2.75 10.31 10.38 9.7 12.46c-.73 2.44-10.08-7.06-23.98-6.49c-4.86.2-3.45-2.78-1.2-4.5c2.97-2.27 7.96-3.91 15.48-1.47z"
+            fill="#FFCA2822">
+          </path>
+          <path
+            d="M81.67 31.96c8.44 2.75 10.31 10.38 9.7 12.46c-.73 2.44-10.08-7.06-23.98-6.49c-4.86.2-3.45-2.78-1.2-4.5c2.97-2.27 7.96-3.91 15.48-1.47z"
+            fill="#FFCA2830">
+          </path>
+          <path
+            d="M96.49 58.86c1.06-.73 4.62.53 5.62 7.5c.49 3.41.64 6.71.64 6.71s-4.2-3.77-5.59-6.42c-1.75-3.35-2.43-6.59-.67-7.79z"
+            fill="#00000050">
+          </path>
+        </g>
+
+      </svg>
+    </span>
+    <span id="upgrade" onmousedown="if (selected && selected.upgrades.length > 0) upgrade(selected.upgrades[0])">
+      <svg width="35px" height="35px" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+        <g fill="none">
+          <path fill="#4f4426"
+          d="M256 29.816l-231 154v106.368l231-154 231 154V183.816zm0 128.043L105 259.783v90.283l151-101.925 151 101.925v-90.283zm0 112l-87 58.725v67.6l87-58 87 58v-67.6zm0 89.957l-87 58v64.368l87-58 87 58v-64.368z" />
+        </svg>
+      </g>
+    </span>
+  </div>
+
+  <div id="disableBack"></div>
+
+  <div id="menuPause">
+    <div id="label">Pause</div>
+    <div id="resume" onmouseup="pause();">Resume</div>
+    <div id="restart" onmouseup="resetGame()">Restart</div>
+    <div id="mainmenu" onclick="window.location.href = 'index.html'">Menu</div>
+    <div id="setting">Setting</div>
+  </div>
+
+  <div id="Setting"></div>
+
+  <div id="result">
+    <div class="strs">
+      <span class="s_ s1"><span class="thisstr"></span></span>
+      <span class="s_ s2"><span class="thisstr"></span></span>
+      <span class="s_ s3"><span class="thisstr"></span></span>
+    </div>
+    <div class="head" id="head">VICTORY</div>
+    <div class="btns">
+      <span class="btn retry" onmouseup="location.reload()">
+        <svg fill="#4f4426" style="transform: rotateX(180deg) rotateZ(-90deg);" xmlns="http://www.w3.org/2000/svg"
+          x="0px" y="0px" width="40px" height="40px" viewBox="0 0 72 72">
+          <path
+            d="M 34.099609 7.0019531 C 33.029594 6.94575 32 7.7786875 32 8.9921875 L 32 12.339844 C 20.664873 14.250415 12 24.129249 12 36 C 12 49.234 22.767 60 36 60 C 49.233 60 60 49.234 60 36 C 60 30.33 57.985125 24.827859 54.328125 20.505859 C 52.898125 18.818859 50.374406 18.606156 48.691406 20.035156 C 47.004406 21.462156 46.793703 23.986828 48.220703 25.673828 C 50.657703 28.552828 52 32.22 52 36 C 52 44.822 44.822 52 36 52 C 27.178 52 20 44.822 20 36 C 20 28.561394 25.110881 22.310779 32 20.527344 L 32 23.005859 C 32 24.624859 33.829484 25.566 35.146484 24.625 L 44.951172 17.617188 C 46.061172 16.824188 46.061172 15.173859 44.951172 14.380859 L 35.146484 7.3730469 C 34.817234 7.1377969 34.456281 7.0206875 34.099609 7.0019531 z">
+          </path>
+        </svg>
+      </span>
+      <span class="btn menuOpen" onclick="window.location.href = 'index.html'">
+        <svg fill="#4f4426" height="40px" width="40px" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
+          xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-51.2 -51.2 614.40 614.40" xml:space="preserve">
+          <path
+            d="M186.2,139.6h139.6V0H186.2V139.6z M372.4,0v139.6H512V0H372.4z M0,139.6h139.6V0H0V139.6z M186.2,325.8h139.6V186.2H186.2 V325.8z M372.4,325.8H512V186.2H372.4V325.8z M0,325.8h139.6V186.2H0V325.8z M186.2,512h139.6V372.4H186.2V512z M372.4,512H512 V372.4H372.4V512z M0,512h139.6V372.4H0V512z">
+          </path>
+        </svg>
+      </span>
+      <span class="btn next" id="next" onclick="goLevel(Number(localStorage.getItem('CurrentLevel')));">
+        <svg fill="#4f4426" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="35px"
+          height="30px" viewBox="0 0 163.861 163.861" xml:space="preserve">
+          <g>
+            <path
+              d="M34.857,3.613C20.084-4.861,8.107,2.081,8.107,19.106v125.637c0,17.042,11.977,23.975,26.75,15.509L144.67,97.275 c14.778-8.477,14.778-22.211,0-30.686L34.857,3.613z" />
+          </g>
+        </svg>
+      </span>
+    </div>
+  </div>
+
+  <div class="loader">
+    <div class="loaderText"></div>
+    <div class="loaderLine"></div>
+  </div>
+
+  <script>
+    window.addEventListener("contextmenu", (e) => e.preventDefault());
+
+    function goLevel(n){
+      localStorage.setItem("CurrentLevel", n+1);
+      location.reload();
+    }
+    function Elem(name, id, parent) {
+      let elem = document.createElement(name);
+      elem.setAttribute('class', id);
+      parent.appendChild(elem);
+      return elem;
+    }
+
+    let musicInp = 100;
+    let soundInp = 100;
+
+    if (localStorage.getItem("Music")) {
+      musicInp = localStorage.getItem("Music");
+    }
+
+    if (localStorage.getItem("Sound")) {
+      soundInp = localStorage.getItem("Sound");
+    }
+
+    // Setting
+    let setting = document.getElementById('setting');
+    let set = document.getElementById('Setting');
+
+    let closeSet = Elem('div', 'closeSet', set);
+
+    let lbl = Elem('div', 'mainSet label', set);
+    lbl.innerHTML = 'SETTINGS'
+
+    let music = Elem('div', 'st music', set);
+    let lblMusic = Elem('div', 'label', music);
+    lblMusic.innerHTML = 'MUSIC';
+    let slide1 = Elem('input', 'slide1', music);
+    slide1.setAttribute('type', 'range');
+    slide1.setAttribute('min', 0);
+    slide1.setAttribute('max', 100);
+    slide1.setAttribute('value', musicInp);
+    let slideB1 = Elem('div', 'sld', music);
+    let slide1D = Elem('div', 'sld1', music);
+    let thumb1 = Elem('div', 'thumb1', music);
+
+    let sound = Elem('div', 'st sound', set);
+    let lblSound = Elem('div', 'label', sound);
+    lblSound.innerHTML = 'SOUND';
+    let slide2 = Elem('input', 'slide2', sound);
+    slide2.setAttribute('type', 'range')
+    slide2.setAttribute('min', 0);
+    slide2.setAttribute('max', 100);
+    slide2.setAttribute('value', soundInp);
+    let slideB2 = Elem('div', 'sld', sound);
+    let slide2D = Elem('div', 'sld2', sound);
+    let thumb2 = Elem('div', 'thumb2', sound);
+
+
+    let credit = Elem('div', 'credit', set);
+    credit.innerHTML = 'CREDIT'
+
+    thumb1.style.left = musicInp - 50 + '%';
+    slide1D.style.width = 'calc((var(--homeWidth) - 2.80em)/' + (100 / musicInp) + ')';
+    thumb2.style.left = soundInp - 50 + '%';
+    slide2D.style.width = 'calc((var(--homeWidth) - 2.80em)/' + (100 / soundInp) + ')';
+
+    setting.onclick = () => {
+      menuPause.style.display = 'none';
+      set.style.display = 'flex';
+    }
+
+    slide1.oninput = function () {
+      musicInp = slide1.value;
+      thumb1.style.left = musicInp - 50 + '%';
+      slide1D.style.width = 'calc((var(--homeWidth) - 2.80em)/' + (100 / musicInp) + ')';
+      localStorage.setItem("Music", slide1.value);
+      changeVolume(vB = slide1.value, vM = slide2.value, pS = 1);
+    }
+
+    slide2.oninput = function () {
+      soundInp = slide2.value;
+      thumb2.style.left = soundInp - 50 + '%';
+      slide2D.style.width = 'calc((var(--homeWidth) - 2.80em)/' + (100 / soundInp) + ')';
+      localStorage.setItem("Sound", slide2.value);
+      changeVolume(vB = slide1.value, vM = slide2.value, pS = 1);
+    }
+
+    closeSet.onclick = () => {
+      set.style.display = 'none';
+      menuPause.style.display = 'flex';
+    }
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,747 @@
+<html>
+
+<head>
+    <title>Home</title>
+
+    <script src="scripts/lib/p5.min.js" defer></script>
+    <script src="scripts/lib/p5.sound.min.js" defer></script>
+    <script src="https://sdk.crazygames.com/crazygames-sdk-v3.js"></script>
+    <style>
+        @font-face {
+            font-family: newDos;
+            src: url('fonts/vertopal.com_NewDOS.ttf');
+        }
+
+        * {
+            --homeHeight: 4em;
+            --homeWidth: 17em;
+            --lvlHeight: 4.5em;
+            --lvlWidth: 4.5em;
+            --settingHeight: 4em;
+            --settingWidth: 14em;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            box-sizing: border-box;
+            font-family: newDos;
+            border: none;
+            cursor: url('Images/cursor/selectYellow.cur'), auto;
+        }
+
+        *:hover {
+            cursor: url('Images/cursor/selectGreen.cur'), auto;
+        }
+
+        body {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+            align-items: center;
+            justify-content: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-image: url('Images/UI/Loading_Screen/Background.png');
+        }
+
+        .home {
+            position: absolute;
+            display: grid;
+            gap: calc(var(--homeHeight)/3);
+            grid-template-columns: auto;
+            animation: pop .3s linear;
+        }
+
+        .btn {
+            height: var(--homeHeight);
+            width: var(--homeWidth);
+            background-size: cover;
+            background-repeat: no-repeat;
+            transition: .2s;
+        }
+
+        .btn:hover {
+            transform: scale(1.1);
+        }
+
+        .play {
+            background-image: url('Images/UI/Main_Menu/BTN_PLAY.png');
+        }
+
+        .setting {
+            background-image: url('Images/UI/Main_Menu/BTN_SETTINGS.png');
+        }
+
+        .content {
+            display: none;
+            gap: calc(var(--lvlWidth)/4);
+            grid-template-columns: auto auto auto auto auto auto;
+            /* check */
+            padding: .7em;
+        }
+
+        .lvl {
+            width: var(--lvlWidth);
+            height: var(--lvlHeight);
+            background-size: 105%;
+            transition: .2s;
+            transform: scale(1);
+            background-repeat: no-repeat;
+            background-position: 80% -5%;
+            box-shadow: 3px 3px 5px black;
+            animation: pop .3s linear;
+        }
+
+        .lvl:hover {
+            transform: scale(1.1);
+        }
+
+        .str {
+            position: absolute;
+            top: 0%;
+            left: 50%;
+            justify-content: space-between;
+            transform: translate(-50%, -50%);
+        }
+
+        .str span {
+            width: 1.5em;
+            height: 1.5em;
+            margin: .1em;
+            background-size: 100%;
+            background-repeat: no-repeat;
+            background-image: url('Images/UI/Levels_Menu/StarD.png');
+        }
+
+        .str span:nth-child(1) {
+            transform: rotate(-5deg);
+        }
+
+        .str span:nth-child(2) {
+            transform: translate(0, -20%);
+        }
+
+        .str span:nth-child(3) {
+            transform: rotate(5deg);
+        }
+
+        .closeLvl {
+            height: calc(var(--lvlHeight)/2);
+            width: calc(var(--lvlWidth)/2);
+            position: absolute;
+            transform: translate(-150%, -150%);
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-image: url('Images/UI/Main_Menu/BTN_Exit.png');
+            transition: .2s;
+            box-shadow: 3px 3px 5px rgb(0, 0, 0);
+            animation: pop .3s linear;
+        }
+
+        .closeLvl:hover {
+            transform: translate(-150%, -150%) scale(1.1);
+        }
+
+        .lvl2 {
+            filter: contrast(1.08);
+        }
+
+        .lvl[disabled] {
+            filter: grayscale(1);
+        }
+
+        .lvl2[disabled] {
+            filter: contrast(1.08) grayscale(1);
+        }
+
+        .lvl[disabled]::before {
+            content: '';
+            position: absolute;
+            top: 90%;
+            left: 92%;
+            transform: translate(-50%, -50%);
+            width: calc(var(--lvlWidth)/2);
+            height: calc(var(--lvlHeight)/2);
+            background-size: 100% 100%;
+            background-image: url('Images/UI/Levels_Menu/lock.svg');
+        }
+
+        .set {
+            height: 40em;
+            width: 20em;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            box-shadow: 5px 0px 10px black;
+            background-image: url('Images/UI/Settings/Settings_BG.png');
+            animation: pop .3s linear;
+        }
+
+        .closeSet {
+            height: calc(var(--lvlHeight)/2);
+            width: calc(var(--lvlWidth)/2);
+            transform: translate(-550%, 50%);
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-image: url('Images/UI/Main_Menu/BTN_Exit.png');
+            transition: .2s;
+            box-shadow: 3px 3px 5px rgb(0, 0, 0);
+            animation: popSet .3s linear;
+        }
+
+        .closeSet:hover {
+            transform: translate(-550%, 50%) scale(1.1);
+        }
+
+        .st {
+            width: var(--settingWidth);
+            display: flex;
+            margin: 3.5em;
+            transform: translate(0, -50%);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .slide1,
+        .slide2 {
+            appearance: none;
+            -webkit-appearance: none;
+            width: var(--homeWidth);
+            height: .5em;
+            outline: none;
+            z-index: 2;
+            background: none;
+        }
+
+        .sld {
+            width: var(--settingWidth);
+            height: .5em;
+            position: absolute;
+            top: 75%;
+            left: 0;
+            border-radius: 3px;
+            transform: translate(-1%, -50%);
+            background-size: 100% 100%;
+            background-image: url('Images/UI/Settings/Bar_BG.png');
+        }
+
+        .slide1::-webkit-slider-thumb,
+        .slide2::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 25px;
+            z-index: 3;
+            position: relative;
+        }
+
+        .sld1,
+        .sld2 {
+            width: var(--settingWidth);
+            position: absolute;
+            height: .5em;
+            top: 70%;
+            left: 0;
+            border-radius: 3px;
+            background-size: 100% 100%;
+            background-image: url('Images/UI/Settings/Bar.png');
+        }
+
+        .thumb1,
+        .thumb2 {
+            position: relative;
+            width: 20px;
+            height: 20px;
+            left: 0%;
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-image: url('Images/UI/Settings/Chebox_02.png');
+            transform: translate(0%, -60%);
+        }
+
+        .label {
+            width: max-content;
+            height: max-content;
+            text-align: center;
+            font-size: 2em;
+            font-weight: bolder;
+            margin-bottom: 1em;
+            color: rgb(95, 80, 40);
+            text-shadow: 0px 3px 3px black;
+            transform: translate(0, -50%);
+        }
+
+        .mainSet {
+            width: max-content;
+            font-size: 2.5em;
+        }
+
+        .credit {
+            display: flex;
+            width: calc(var(--settingWidth)/2);
+            height: calc(var(--settingHeight)/2.6);
+            align-items: center;
+            padding-top: 5px;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bolder;
+            background-repeat: no-repeat;
+            background-size: cover;
+            box-shadow: 3px 3px 5px black;
+            background-image: url('Images/UI/Main_Menu/Button_BG.png');
+            transform: translate(0, -50%);
+            color: rgb(95, 80, 40);
+            transition: .2s;
+        }
+
+        .credit:hover {
+            transform: translate(0, -50%) scale(1.1);
+            transition: .2s;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes popLvl {
+            0% {
+                transform: translate(-150%, -150%) scale(1);
+            }
+
+            50% {
+                transform: translate(-150%, -150%) scale(1.1);
+            }
+
+            100% {
+                transform: translate(-150%, -150%) scale(1);
+            }
+        }
+
+        @keyframes popSet {
+            0% {
+                transform: translate(-550%, 50%) scale(1);
+            }
+
+            50% {
+                transform: translate(-550%, 50%) scale(1.1);
+            }
+
+            100% {
+                transform: translate(-550%, 50%) scale(1);
+            }
+        }
+
+        .loader {
+            position: fixed;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10;
+            justify-content: space-around;
+            background-color: #111
+        }
+
+        .loaderText {
+            position: absolute;
+            left: 50%;
+            bottom: 15%;
+            --text: 'Loading...';
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            font-family: monospace;
+            display: inline-grid;
+            font-size: 30px;
+            transition: cubic-bezier(0.895, 0.03, 0.685, 0.22);
+        }
+
+        .loaderText:before,
+        .loaderText:after {
+            content: var(--text);
+            color: white;
+            grid-area: 1/1;
+            -webkit-mask-size: 100% 5px, 100% 100%;
+            -webkit-mask-repeat: no-repeat;
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            animation: l35-1 1s infinite;
+        }
+
+        .loaderText:before {
+            -webkit-mask-image:
+                linear-gradient(#000 0 0),
+                linear-gradient(#000 0 0);
+        }
+
+        .loaderText:after {
+            -webkit-mask-image:
+                linear-gradient(#000 0 0);
+            animation:
+                l35-1 1s infinite,
+                l35-2 .2s infinite cubic-bezier(0.5, 200, 0.5, -200);
+        }
+
+        @keyframes l35-1 {
+            0% {
+                -webkit-mask-position: 0 20px, 0 0;
+            }
+
+            20% {
+                -webkit-mask-position: 0 8px, 0 0;
+            }
+
+            40% {
+                -webkit-mask-position: 0 100%, 0 0;
+            }
+
+            60% {
+                -webkit-mask-position: 0 3px, 0 0;
+            }
+
+            80% {
+                -webkit-mask-position: 0 15px, 0 0;
+            }
+
+            100% {
+                -webkit-mask-position: 0 0, 0 0;
+            }
+        }
+
+        @keyframes l35-2 {
+            100% {
+                transform: translate(0.1px);
+            }
+        }
+
+        .loaderLine {
+            width: 0;
+            height: 4.8px;
+            position: absolute;
+            top: 90%;
+            display: inline-block;
+            position: relative;
+            background: #FFF;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            box-sizing: border-box;
+        }
+
+        .loaderLine::after,
+        .loaderLine::before {
+            content: '';
+            width: 10px;
+            height: 1px;
+            background: #FFF;
+            position: absolute;
+            top: 9px;
+            right: -2px;
+            opacity: 0;
+            transform: rotate(-45deg) translateX(0px);
+            box-sizing: border-box;
+            animation: coli1 0.3s linear infinite;
+        }
+
+        .loaderLine::before {
+            top: -4px;
+            transform: rotate(45deg);
+            animation: coli2 0.3s linear infinite;
+        }
+
+        @keyframes coli1 {
+            0% {
+                transform: rotate(-45deg) translateX(0px);
+                opacity: 0.7;
+            }
+
+            100% {
+                transform: rotate(-45deg) translateX(-45px);
+                opacity: 0;
+            }
+        }
+
+        @keyframes coli2 {
+            0% {
+                transform: rotate(45deg) translateX(0px);
+                opacity: 1;
+            }
+
+            100% {
+                transform: rotate(45deg) translateX(-45px);
+                opacity: 0.7;
+            }
+        }
+    </style>
+</head>
+
+<body onclick="playAll(true)">
+    <div class="loader">
+        <div class="loaderText"></div>
+        <div class="loaderLine"></div>
+    </div>
+    <script>
+        window.addEventListener("contextmenu", (e) => e.preventDefault());
+        window.addEventListener("wheel", (event) => event.preventDefault(), {
+            passive: false,
+        });
+
+        window.addEventListener("keydown", (event) => {
+            if (["ArrowUp", "ArrowDown", " "].includes(event.key)) {
+                event.preventDefault();
+            }
+        });
+
+        await window.CrazyGames.SDK.init();
+        try {
+            const user = await window.CrazyGames.SDK.user.getUser();
+            console.log(user);
+        } catch (e) {
+            console.log("Get user error: ", e);
+        }
+        window.CrazyGames.SDK.environment;
+        window.CrazyGames.SDK.user.systemInfo;
+        // const callbacks = {
+        //     adFinished: () => console.log("End midgame ad"),
+        //     adError: (error) => console.log("Error midgame ad", error),
+        //     adStarted: () => console.log("Start midgame ad"),
+        // };
+        // window.CrazyGames.SDK.ad.requestAd("midgame", callbacks);
+        // window.CrazyGames.SDK.ad.requestAd("rewarded", callbacks);
+
+        let musicInp = 100;
+        let soundInp = 100;
+        let loader = 0;
+        let sounds;
+        function LoadedAssets(i = null) {
+            loader++;
+            let num_ = (loader / 2) * 100;
+            document.querySelector('.loaderLine').style.width = num_ + '%';
+            if (num_ < 100) {
+                document.querySelector('.loaderText').style.setProperty('--text', '\"' + Math.floor(num_) + '%\"');
+            } else {
+                document.querySelector('.loaderText').style.setProperty('--text', '\"Click To Continue...\"');
+            }
+        }
+
+        if (localStorage.getItem("Music")) {
+            musicInp = Number(localStorage.getItem("Music"));
+        }
+
+        if (localStorage.getItem("Sound")) {
+            soundInp = Number(localStorage.getItem("Sound"));
+        }
+
+
+        function createLevelElement(num, parent) {
+            let CLevel;
+            for (let i = 1; i <= num; i++) {
+                CLevel = 1;
+                let level = 'lvl lvl' + i;
+                let lvl = document.createElement('button');
+                lvl.setAttribute('class', level);
+                lvl.setAttribute('onmouseup', 'golevel(' + i + ')');
+                lvl.style.backgroundImage = "url('Images/UI/Levels_Menu/" + i + ".png')";
+
+                let str = document.createElement('div');
+                str.setAttribute('class', 'str');
+                for (var m in completeLevel) {
+                    if (m == 'lvl' + i) {
+                        str.style.display = 'flex';
+                        for (let j = 1; j <= 3; j++) {
+                            let elem = document.createElement('span');
+                            elem.setAttribute('class', j);
+                            if (j <= completeLevel['lvl' + i]) {
+                                elem.style.backgroundImage = "url('Images/UI/Levels_Menu/star.png')";
+                            }
+                            str.appendChild(elem)
+                        }
+                    } else {
+                        str.style.display = 'none';
+                    }
+                    CLevel++;
+                }
+                lvl.setAttribute('disabled', 'true');
+                lvl.appendChild(str)
+                parent.appendChild(lvl);
+            }
+            for (let i = 1; i <= CLevel; i++) {
+                document.querySelector('.lvl' + i).removeAttribute('disabled');
+                document.querySelector('.lvl' + i).querySelector('.str').style.display = 'flex';
+            }
+        }
+
+        function golevel(n) {
+            localStorage.setItem("CurrentLevel", n);
+            window.location.href = 'play.html';
+        }
+
+        function Elem(name, id, parent) {
+            let elem = document.createElement(name);
+            elem.setAttribute('class', id);
+            parent.appendChild(elem);
+            return elem;
+        }
+
+        let completeLevel;
+        if (localStorage.getItem('CompleteLevel')) {
+            completeLevel = JSON.parse(localStorage.getItem('CompleteLevel'));
+        } else {
+            localStorage.setItem("CompleteLevel", "{}");
+            completeLevel = JSON.parse(localStorage.getItem('CompleteLevel'));
+        }
+
+        let total = 18 //check
+        let main = document.body
+        let home = Elem('div', 'home', main);
+
+        // Level
+        let pack = Elem('div', 'content', main);
+        let closeLvl = Elem('div', 'closeLvl', pack);
+
+        // Home
+        let play = Elem('div', 'btn play', home);
+        let setting = Elem('div', 'btn setting', home);
+
+        // Setting
+        let set = Elem('div', 'set', main);
+
+        let closeSet = Elem('div', 'closeSet', set)
+
+        let lbl = Elem('div', 'mainSet label', set);
+        lbl.innerHTML = 'SETTINGS'
+
+        let music = Elem('div', 'st music', set);
+        let lblMusic = Elem('div', 'label', music);
+        lblMusic.innerHTML = 'MUSIC';
+        let slide1 = Elem('input', 'slide1', music);
+        let slideB1 = Elem('div', 'sld', music);
+        let slide1D = Elem('div', 'sld1', music);
+        let thumb1 = Elem('div', 'thumb1', music);
+        slide1.setAttribute('type', 'range');
+        slide1.setAttribute('min', 1);
+        slide1.setAttribute('max', 100);
+        slide1.setAttribute('value', 100);
+
+        let sound = Elem('div', 'st sound', set);
+        let lblSound = Elem('div', 'label', sound);
+        lblSound.innerHTML = 'SOUND';
+        let slide2 = Elem('input', 'slide2', sound);
+        let slideB2 = Elem('div', 'sld', sound);
+        let slide2D = Elem('div', 'sld2', sound);
+        let thumb2 = Elem('div', 'thumb2', sound);
+        slide2.setAttribute('type', 'range');
+        slide2.setAttribute('min', 1);
+        slide2.setAttribute('max', 100);
+        slide2.setAttribute('value', 100);
+
+        thumb1.style.left = musicInp - 50 + '%';
+        slide1D.style.width = 'calc((var(--homeWidth) - 2.80em)/' + (100 / musicInp) + ')';
+        thumb2.style.left = soundInp - 50 + '%';
+        slide2D.style.width = 'calc((var(--homeWidth) - 2.80em)/' + (100 / soundInp) + ')';
+
+        let credit = Elem('div', 'credit', set);
+        credit.innerHTML = 'CREDIT'
+        createLevelElement(total, pack);
+
+        closeLvl.onclick = () => {
+            pack.style.display = 'none';
+            home.style.display = 'grid';
+            set.style.display = 'none';
+        }
+
+        play.onclick = () => {
+            pack.style.display = 'grid';
+            home.style.display = 'none';
+            set.style.display = 'none';
+        }
+
+        setting.onclick = () => {
+            pack.style.display = 'none';
+            home.style.display = 'none';
+            set.style.display = 'flex';
+        }
+
+        slide1.oninput = function () {
+            musicInp = slide1.value;
+            thumb1.style.left = musicInp - 50 + '%';
+            slide1D.style.width = 'calc((var(--homeWidth) - 2.80em)/' + (100 / musicInp) + ')';
+            localStorage.setItem("Music", slide1.value);
+            changeVolume(vB = slide1.value, vM = slide2.value, pS = true);
+        }
+
+        slide2.oninput = function () {
+            soundInp = slide2.value;
+            thumb2.style.left = soundInp - 50 + '%';
+            slide2D.style.width = 'calc((var(--homeWidth) - 2.80em)/' + (100 / soundInp) + ')';
+            localStorage.setItem("Sound", slide2.value);
+            changeVolume(vB = slide1.value, vM = slide2.value, pS = false);
+        }
+
+        closeSet.onclick = () => {
+            pack.style.display = 'none';
+            home.style.display = 'grid';
+            set.style.display = 'none';
+        }
+
+        function preload() {
+            if (localStorage.getItem("Music")) {
+                musicInp = Number(localStorage.getItem("Music"));
+            }
+            if (localStorage.getItem("Sound")) {
+                soundInp = Number(localStorage.getItem("Sound"));
+            }
+            sounds = {};
+            soundFormats('wav');
+            // Home
+            sounds.home = loadSound('sounds/home.wav', LoadedAssets);
+            sounds.home.setVolume(musicInp / 100);
+            // mouse click
+            sounds.mClick = loadSound('sounds/click.wav', LoadedAssets);
+            sounds.mClick.setVolume(soundInp / 100);
+        }
+
+        function setup() {
+            document.querySelector('.loader').onclick = () => {
+                pack.style.display = 'grid';
+                set.style.display = 'flex';
+                home.style.display = 'grid';
+                pack.style.display = 'none';
+                set.style.display = 'none';
+                playAll();
+                document.querySelector('.loader').style.display = 'none';
+            }
+            console.log(loader);
+        }
+
+        function playAll(n) {
+            if (!sounds.home.isPlaying()) { sounds.home.loop() };
+            if (n) { sounds.mClick.play() };
+        }
+
+        function changeVolume(vB = 0, vM = 0, pS = false) {
+            vB = vB / 100;
+            vM = vM / 100;
+
+            if (pS) {
+                sounds.home.pause();
+                sounds.home.setVolume(vB);
+                sounds.home.loop();
+            }
+
+            if (!pS) {
+                sounds.mClick.setVolume(vM);
+            }
+        }
+    </script>
+</body>
+
+</html>
